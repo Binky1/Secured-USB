@@ -3,7 +3,6 @@ from all import *
 IP = "0.0.0.0"
 PORT = 8080
 
-key = ""
 
 def check_user(name, passw): # check if user in the system
     if name == "ori" and passw == "ori":
