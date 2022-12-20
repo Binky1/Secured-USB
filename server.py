@@ -3,6 +3,14 @@ from all import *
 IP = "0.0.0.0"
 PORT = 8080
 
+#TODO Generate a key on sign up
+key = ""
+
+
+def read_key():
+    with open('key.key', 'rb') as filekey:
+        global key
+        key = filekey.read()
 
 def check_user(name, passw): # check if user in the system
     if name == "ori" and passw == "ori":
@@ -20,7 +28,9 @@ def parse_protocol_message(msg):
     if code == 'ISSG':
         return 'SGIN' + '~' + check_user(text[0], text[1])
     elif code == 'CODE':
-        return 'GCOD' + '~' + str(key)
+        read_key()
+        print('GCOD' + '~' + key.decode())
+        return 'GCOD' + '~' + key.decode()
     return "ERRO"
 
 
@@ -35,8 +45,6 @@ def handle_client(csock, addr):
 
 def main():
     s = socket.socket()
-    global key
-    key = Fernet.generate_key()
     print("-> " + str(key))
     s.bind((IP,PORT))
     s.listen()

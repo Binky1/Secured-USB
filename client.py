@@ -6,6 +6,7 @@ driver_name = ""
 def build_protocol_message(sock, command, msg):
 
     full_msg = command + '~' + msg
+    print(full_msg)
     send_one_message(sock, full_msg)
 
 def gui_decrypt(sock):
@@ -44,7 +45,15 @@ def secure_files(sock):
     key = parse_message_protocol(d)
     print(key)
 
-    print("COMPLETE")
+    encrypter = Fernet(key.encode())
+    origin = dir_name + '.zip'
+    print(origin)
+    try:
+        encrypted = encrypter.encrypt(origin)
+        print(encrypted)
+        print("COMPLETE")
+    except Exception as e:
+        print(e)
 
 def app_system(sock):
     global root
@@ -63,23 +72,28 @@ def wait_until_plugged(sock):
 
         
 
-        original = set(get_driveStatus())
+        # original = set(get_driveStatus())
         time.sleep(3)
-        add_device =  set(get_driveStatus())- original
-        subt_device = original - set(get_driveStatus())
+        connected = True
+        # add_device =  set(get_driveStatus())- original
+        # subt_device = original - set(get_driveStatus())
 
-        if (len(add_device)):
-            for drive in add_device:
-                    #print( "The drives added: %s." % (drive))
-                    global driver_name
-                    driver_name = drive
-                    gui_decrypt(sock)
+        if connected:
+            global driver_name
+            gui_decrypt(sock)
+        
+        # if (len(add_device)):
+        #     for drive in add_device:
+        #             #print( "The drives added: %s." % (drive))
+        #             global driver_name
+        #             driver_name = drive
+        #             gui_decrypt(sock)
                  
-        elif(len(subt_device)):
-            #print ("There were %d"% (len(subt_device)))
-            for drive in subt_device:
-                    #print ("The drives remove: %s." % (drive))
-                    pass
+        # elif(len(subt_device)):
+        #     #print ("There were %d"% (len(subt_device)))
+        #     for drive in subt_device:
+        #             #print ("The drives remove: %s." % (drive))
+        #             pass
 
 def parse_message_protocol(msg):
     code = msg[:4]
