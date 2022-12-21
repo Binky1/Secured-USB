@@ -3,6 +3,36 @@ from all import *
 root = Tk()
 driver_name = ""
 
+def delete_files(path): # delete all files in directory
+    files = glob.glob(f'{path}\*')
+    for f in files:
+        print(f)
+        os.remove(f)
+
+def get_key(sock):
+    build_protocol_message(sock, 'CODE', '')
+    d = recv_one_message(sock)
+    return parse_message_protocol(d)
+
+def decrypt_zip(dec, path): # decrypt zip file content and save it 
+    data = b''
+    print(path)
+    with open(path, 'rb') as f:
+        data = f.read()
+    os.remove(path)
+    print(data)
+    with open(path, 'wb') as f:
+        f.write(dec.decrypt(data))
+    shutil.unpack_archive(path) # extract the zip file
+
+def encrypt_zip(enc, path): # encrypt zip file content and save it
+    enc_data = b""
+    with open(path, 'rb') as f:
+        data = f.read()
+        enc_data = enc.encrypt(data)
+    with open(path, 'wb') as f:
+        f.write(enc_data)
+
 def build_protocol_message(sock, command, msg):
 
     full_msg = command + '~' + msg
@@ -40,20 +70,24 @@ def secure_files(sock):
 
     dir_name = r'C:\temp\temp'
     shutil.make_archive(dir_name, 'zip', dir_name)
-    build_protocol_message(sock, 'CODE', '')
-    d = recv_one_message(sock)
-    key = parse_message_protocol(d)
+    delete_files(dir_name)
+    key = get_key(sock)
     print(key)
 
     encrypter = Fernet(key.encode())
     origin = dir_name + '.zip'
+    encrypt_zip(encrypter, origin)
     print(origin)
-    try:
-        encrypted = encrypter.encrypt(origin)
-        print(encrypted)
-        print("COMPLETE")
-    except Exception as e:
-        print(e)
+
+def decrypt_files(sock):
+    dir_name = r'C:\temp\temp' + '.zip'
+    key = get_key(sock)
+    decrypter = Fernet(key.encode())
+    decrypt_zip(decrypter, dir_name)
+    print('d')
+
+
+
 
 def app_system(sock):
     global root
@@ -63,7 +97,7 @@ def app_system(sock):
     root.title("System")
     root.geometry("300x200")
     Button(root, height=1, width=15, text="Secure my files!", command = lambda: secure_files(sock)).place(x=0)
-    Button(root, height=1, width=15, text="Decrypt my files!").place(x=150)
+    Button(root, height=1, width=15, text="Decrypt my files!", command = lambda: decrypt_files(sock)).place(x=150)
 
     root.mainloop()
 
