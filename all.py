@@ -4,5 +4,5 @@ import threading
 from tkinter import *
 import os,string,time, glob
 from ctypes import windll
-import shutil
+import shutil, zipfile
 from cryptography.fernet import Fernet

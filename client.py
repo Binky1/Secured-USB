@@ -4,7 +4,7 @@ root = Tk()
 driver_name = ""
 
 def delete_files(path): # delete all files in directory
-    files = glob.glob(f'{path}\*')
+    files = glob.glob(f'{path}\*.*')
     for f in files:
         print(f)
         os.remove(f)
@@ -23,7 +23,8 @@ def decrypt_zip(dec, path): # decrypt zip file content and save it
     print(data)
     with open(path, 'wb') as f:
         f.write(dec.decrypt(data))
-    shutil.unpack_archive(path) # extract the zip file
+    print(path)
+    shutil.unpack_archive(path, path) # extract the zip fileu
 
 def encrypt_zip(enc, path): # encrypt zip file content and save it
     enc_data = b""
@@ -39,10 +40,10 @@ def build_protocol_message(sock, command, msg):
     print(full_msg)
     send_one_message(sock, full_msg)
 
-def gui_decrypt(sock):
+def gui_decrypt(sock): # lunch screen
 
     root.geometry("300x200")
-
+    root.iconbitmap(r"img\favicon.ico")
     x = Label(root, text = "LOGIN", font = ('bold', 20)).place(x=90)
     username_text = Label(root, text = "Username: ", font = ('bold', 15)).place(y=50)
     password_text = Label(root, text = "Password: ", font = ('bold', 15)).place(y=100)
@@ -51,7 +52,7 @@ def gui_decrypt(sock):
     username = Entry(root, width = 15, textvariable=utext).place(x=100,y=55)
     password = Entry(root, show= "*", width = 15,textvariable=ptext).place(x = 100,y=105)
 
-    submit = Button(root,height=1, width=15,text = "Login", command= lambda: login_system(sock,utext.get(), ptext.get()), ).place(x=60,y=155)
+    submit = Button(root,height=1, width=15,text = "Login", command=lambda: app_system(sock)).place(x=60,y=155)
     
     root.mainloop()
 
@@ -66,6 +67,7 @@ def get_driveStatus():
     return devices
 
 def secure_files(sock):
+    
     print('stage 2')
 
     dir_name = r'C:\temp\temp'
@@ -89,17 +91,19 @@ def decrypt_files(sock):
 
 
 
-def app_system(sock):
+def app_system(sock): # the entire screen system
+
     global root
     root.destroy()
 
-    root = Tk()
-    root.title("System")
-    root.geometry("300x200")
-    Button(root, height=1, width=15, text="Secure my files!", command = lambda: secure_files(sock)).place(x=0)
-    Button(root, height=1, width=15, text="Decrypt my files!", command = lambda: decrypt_files(sock)).place(x=150)
+    root2 = Tk()
+    root2.title("System")
+    root2.iconbitmap(r"img\favicon.ico")
+    root2.geometry("300x200")
+    Button(root2, height=1, width=15, text="Secure my files!", command = lambda: secure_files(sock)).place(x=0)
+    Button(root2, height=1, width=15, text="Decrypt my files!", command = lambda: decrypt_files(sock)).place(x=150)
 
-    root.mainloop()
+    root2.mainloop()
 
 def wait_until_plugged(sock):
     while True:
