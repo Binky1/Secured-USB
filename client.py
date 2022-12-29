@@ -2,13 +2,19 @@ from all import *
 
 root = Tk()
 driver_name = ""
-dir_name = r"C:\temp\temp"
+dir_name = r"C:\temp\f"
 
-def delete_files(path): # delete all files in directory
-    files = glob.glob(f'{path}\*.*')
-    for f in files:
-        print(f)
-        os.remove(f)
+def delete_files(dir_path): # delete all files in directory
+    try: 
+        shutil.rmtree(dir_path)
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
+
+def extract_zip():
+    with zipfile.ZipFile(dir_name + '.zip',"r") as zip_ref:
+        zip_ref.extractall(path = dir_name)
+    os.remove(dir_name + '.zip')
+
 
 def get_key(sock):
     build_protocol_message(sock, 'CODE', '')
@@ -25,7 +31,7 @@ def decrypt_zip(dec, path): # decrypt zip file content and save it
     with open(path, 'wb') as f:
         f.write(dec.decrypt(data))
     print(path)
-    shutil.unpack_archive(path, path) # extract the zip fileu
+    extract_zip() # extract the zip fileu
 
 def encrypt_zip(enc, path): # encrypt zip file content and save it
     enc_data = b""
@@ -73,10 +79,13 @@ def secure_files(sock):
 
     global dir_name
     shutil.make_archive(dir_name, 'zip', dir_name)
-    delete_files(dir_name)
+    del_thread = threading.Thread(target = delete_files, args=(dir_name,))
+    del_thread.start()
+    del_thread.join()
     key = get_key(sock)
     print(key)
 
+    print("stage 3:")
     encrypter = Fernet(key.encode())
     origin = dir_name + '.zip'
     encrypt_zip(encrypter, origin)
@@ -102,7 +111,7 @@ def app_system(sock): # the entire screen system
     root2.title("System")
     root2.iconbitmap(r"img\favicon.ico")
     root2.geometry("300x200")
-    Button(root2, height=1, width=15, text="Secure my files!", command = lambda: secure_files(sock)).place(x=0)
+    Button(root2, height=1, width=15, text="Secure my files!", command = lambda: threading.Thread(target=secure_files, args=(sock,)).start()).place(x=0)
     Button(root2, height=1, width=15, text="Decrypt my files!", command = lambda: decrypt_files(sock)).place(x=150)
 
     root2.mainloop()
